@@ -60,17 +60,25 @@ private fun HomeScreen(state: UiState.Home, updateData: (UiEvent) -> Unit = {}) 
                 showAddDialog = false
             }
         ) {
-            Column(modifier = Modifier.padding(16.dp).fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
+            Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
                 var name by remember { mutableStateOf("") }
 
-                OutlinedTextField(value = name, onValueChange = { name = it }, modifier = Modifier.fillMaxWidth(), label = { Text("Add player name") })
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Add player name") }
+                )
 
                 Spacer(modifier = Modifier.padding(16.dp))
 
-                AdaptiveButton(onClick = {
-                    updateData(UiEvent.UpdateScores(state.data + Score(playerName = name)))
-                    showAddDialog = false
-                                         }, modifier = Modifier.fillMaxWidth()) {
+                AdaptiveButton(
+                    onClick = {
+                        updateData(UiEvent.UpdateScores(state.data + Score(playerName = name)))
+                        showAddDialog = false
+                    }, modifier = Modifier.fillMaxWidth(),
+                    enabled = name.isNotBlank()
+                ) {
                     Text("Save")
                 }
 
@@ -110,24 +118,36 @@ private fun HomeScreen(state: UiState.Home, updateData: (UiEvent) -> Unit = {}) 
                                 }
                             ) {
                                 Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
-                                    var name by remember { mutableStateOf("") }
+                                    var newScore by remember { mutableStateOf("") }
 
                                     OutlinedTextField(
-                                        value = name, onValueChange = { name = removeNonNumericCharacters(it) }, modifier = Modifier.fillMaxWidth(), label = { Text("Add to score") },
+                                        value = newScore,
+                                        onValueChange = { newScore = removeNonNumericCharacters(it) },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        label = { Text("Add to score") },
                                         keyboardOptions = KeyboardOptions(
                                             keyboardType = KeyboardType.Number
                                         ),
 
-                                    )
+                                        )
 
                                     Spacer(modifier = Modifier.padding(16.dp))
 
-                                    AdaptiveButton(onClick = {
-                                        updateData(UiEvent.UpdateScores(
-                                            state.data.filterNot { score -> score.playerName == it.playerName } +
-                                            it.copy(score = it.score + name.toInt(), turn = it.turn + 1, zilches = if (name.toInt() == 0) it.zilches + 1 else it.zilches)))
-                                        updateScoreDialog = false
-                                                             }, modifier = Modifier.fillMaxWidth()) {
+                                    AdaptiveButton(
+                                        onClick = {
+                                            updateData(
+                                                UiEvent.UpdateScores(
+                                                    state.data.filterNot { score -> score.playerName == it.playerName } +
+                                                        it.copy(
+                                                            score = it.score + newScore.toInt(),
+                                                            turn = it.turn + 1,
+                                                            zilches = if (newScore.toInt() == 0) it.zilches + 1 else it.zilches
+                                                        )))
+                                            updateScoreDialog = false
+                                        },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        enabled = newScore.isNotBlank()
+                                    ) {
                                         Text("Update Score")
                                     }
                                 }
@@ -143,7 +163,10 @@ private fun HomeScreen(state: UiState.Home, updateData: (UiEvent) -> Unit = {}) 
                                     Text(it.playerName)
                                 },
                                 supportingContent = {
-                                    Row(modifier = Modifier.padding(8.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Row(
+                                        modifier = Modifier.padding(8.dp).fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
                                         Text("Score - ${it.score}")
 
                                         Text("Zilches - ${it.zilches}")
